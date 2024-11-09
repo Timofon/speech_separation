@@ -1,58 +1,43 @@
 from torch import nn
 from torch.nn import Sequential
 
+class SourceSeparator(nn.Module):
+    def __init__(self, input_channels=2, hidden_channels=64, num_layers=3):
+        super(SourceSeparator, self).__init__()
 
-class BaselineModel(nn.Module):
-    """
-    Simple MLP
-    """
+        self.input_channels = input_channels
+        self.hidden_channels = hidden_channels
+        self.num_layers = num_layers
 
-    def __init__(self, n_feats, n_tokens, fc_hidden=512):
-        """
-        Args:
-            n_feats (int): number of input features.
-            n_tokens (int): number of tokens in the vocabulary.
-            fc_hidden (int): number of hidden features.
-        """
-        super().__init__()
-
-        self.net = Sequential(
-            # people say it can approximate any function...
-            nn.Linear(in_features=n_feats, out_features=fc_hidden),
-            nn.ReLU(),
-            nn.Linear(in_features=fc_hidden, out_features=fc_hidden),
-            nn.ReLU(),
-            nn.Linear(in_features=fc_hidden, out_features=n_tokens),
+        self.encoder = nn.LSTM(
+        input_size=input_channels, 
+        hidden_size=hidden_channels, 
+        num_layers=num_layers, 
+        batch_first=True,
+        bidirectional=True
         )
 
-    def forward(self, spectrogram, spectrogram_length, **batch):
-        """
-        Model forward method.
+        self.decoder = nn.LSTM(
+        input_size=hidden_channels * 2,
+        hidden_size=hidden_channels,
+        num_layers=num_layers,
+        batch_first=True,
+        bidirectional=True
+        )
 
-        Args:
-            spectrogram (Tensor): input spectrogram.
-            spectrogram_length (Tensor): spectrogram original lengths.
-        Returns:
-            output (dict): output dict containing log_probs and
-                transformed lengths.
-        """
-        output = self.net(spectrogram.transpose(1, 2))
-        log_probs = nn.functional.log_softmax(output, dim=-1)
-        log_probs_length = self.transform_input_lengths(spectrogram_length)
-        return {"log_probs": log_probs, "log_probs_length": log_probs_length}
+        self.output_layer = nn.Linear(hidden_channels * 2, input_channels) 
 
-    def transform_input_lengths(self, input_lengths):
-        """
-        As the network may compress the Time dimension, we need to know
-        what are the new temporal lengths after compression.
+    def forward(self, mix_audio):
+        _, (hidden_state, _) = self.encoder(mix_audio)
+        hidden_state = hidden_state.view(self.num_layers, 2, self.hidden_channels)
+        hidden_state = hidden_state[-1, :, :]
+        
+        decoded, _ = self.decoder(hidden_state.unsqueeze(0).repeat(mix_audio.shape[0], 1, 1)) 
 
-        Args:
-            input_lengths (Tensor): old input lengths
-        Returns:
-            output_lengths (Tensor): new temporal lengths
-        """
-        return input_lengths  # we don't reduce time dimension here
-
+        separated_sources = self.output_layer(decoded)
+        
+        return separated_sources
+   
     def __str__(self):
         """
         Model prints with the number of parameters.
