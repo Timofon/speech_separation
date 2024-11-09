@@ -1,4 +1,5 @@
 import torch
+from torch.nn.utils.rnn import pad_sequence
 
 
 def collate_fn(dataset_items: list[dict]):
@@ -14,4 +15,12 @@ def collate_fn(dataset_items: list[dict]):
             of the tensors.
     """
 
-    pass  # TODO
+    result = dict()
+
+    for key in dataset_items[0].keys():
+        if 'length' in key:
+            torch.tensor([item[key] for item in dataset_items])
+        else:
+            result[key] = pad_sequence([item[key].squeeze() for item in dataset_items], batch_first=True)
+    
+    return result

@@ -1,13 +1,7 @@
-# Based on seminar materials
-
-# Don't forget to support cases when target_text == ''
+from torchmetrics.audio import SignalDistortionRatio
 
 
-def calc_cer(target_text, predicted_text) -> float:
-    # TODO
-    pass
+def calc_si_sdri(predicted, target, mix):
+    si_sdr = SignalDistortionRatio()
 
-
-def calc_wer(target_text, predicted_text) -> float:
-    # TODO
-    pass
+    return si_sdr(predicted, target) - si_sdr(mix, target)
