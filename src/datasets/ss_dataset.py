@@ -2,17 +2,22 @@ from pathlib import Path
 
 import torchaudio
 
-from datasets import load_dataset
 from src.datasets.base_dataset import BaseDataset
 from src.utils.io_utils import ROOT_PATH
 
 
-class SSDataset(BaseDataset):
-    def __init__(self, mix_audio_dir, s1_audio_dir=None, s2_audio_dir=None, *args, **kwargs):
+class SSAudioOnlyDataset(BaseDataset):
+    def __init__(self, *args, **kwargs):
+        self._data_dir = ROOT_PATH / "data" / "dataset_ss"
+
+        mix_audio_dir = self._data_dir / "audio" / "mix"
+        s1_audio_dir = self._data_dir / "audio" / "s1"
+        s2_audio_dir = self._data_dir / "audio" / "s2" 
+        # video_dir = self._data_dir / "video"
         data = []
         for path in Path(mix_audio_dir).iterdir():
             entry = {}
-            if path.suffix in [".mp3", ".wav", ".flac", ".m4a"]:
+            if path.suffix in [".mp3", ".flac"]:
                 entry["mix_path"] = str(path)
                 entry["mix_len"] = self._calc_audio_len(entry["mix_path"])
 
@@ -31,7 +36,7 @@ class SSDataset(BaseDataset):
             if len(entry) == 6:
                 data.append(entry)
 
-        super().__init__(data, *args, **kwargs)  
+        super().__init__(data, *args, **kwargs)
 
 
     def _calc_audio_len(self, audio_path):
