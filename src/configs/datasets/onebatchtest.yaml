@@ -1,14 +1,10 @@
 train:
   _target_: src.datasets.ss_dataset.SSAudioOnlyDataset
-  mix_audio_dir: "/home/timsenin/pytorch_project_template/data/dataset_ss/dla_dataset/audio/train/mix"
-  s1_audio_dir: "/home/timsenin/pytorch_project_template/data/dataset_ss/dla_dataset/audio/train/s1"
-  s2_audio_dir: "/home/timsenin/pytorch_project_template/data/dataset_ss/dla_dataset/audio/train/s2"
+  part: train
   limit: 2
   instance_transforms: ${transforms.instance_transforms.train}
 val:
   _target_: src.datasets.ss_dataset.SSAudioOnlyDataset
-  mix_audio_dir: "/home/timsenin/pytorch_project_template/data/dataset_ss/dla_dataset/audio/train/mix"
-  s1_audio_dir: "/home/timsenin/pytorch_project_template/data/dataset_ss/dla_dataset/audio/train/s1"
-  s2_audio_dir: "/home/timsenin/pytorch_project_template/data/dataset_ss/dla_dataset/audio/train/s2"
+  part: val
   limit: 2
   instance_transforms: ${transforms.instance_transforms.inference}
