@@ -87,7 +87,7 @@ class Trainer(BaseTrainer):
             self.log_audio(**batch)
             self.log_predictions(**batch)
     
-    def log_audio(self, s1, s2, s1_predicted, s2_predicted, mix, **batch):
+    def log_audio(self, s1, s2, mix, **batch):
         self.writer.add_audio("first_audio", s1[0], 16000)
         self.writer.add_audio("second_audio", s2[0], 16000)
 

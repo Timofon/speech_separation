@@ -20,7 +20,7 @@ def collate_fn(dataset_items: list[dict]):
     for key in dataset_items[0].keys():
         if 'length' in key:
             torch.tensor([item[key] for item in dataset_items])
-        else:
+        elif 'audio' in key:
             result[key] = pad_sequence([item[key].squeeze() for item in dataset_items], batch_first=True)
     
     return result
