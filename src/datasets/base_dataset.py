@@ -23,11 +23,9 @@ class BaseDataset(Dataset):
     def __init__(
         self,
         index,
-        text_encoder=None,
         target_sr=16000,
         limit=None,
         max_audio_length=None,
-        max_text_length=None,
         shuffle_index=False,
         instance_transforms=None,
     ):
@@ -51,7 +49,7 @@ class BaseDataset(Dataset):
         self._assert_index_is_valid(index)
 
         index = self._filter_records_from_dataset(
-            index, max_audio_length, max_text_length
+            index, max_audio_length, max_text_length=None
         )
         index = self._shuffle_and_limit_index(index, limit, shuffle_index)
         if not shuffle_index:
@@ -59,7 +57,6 @@ class BaseDataset(Dataset):
 
         self._index: list[dict] = index
 
-        self.text_encoder = text_encoder
         self.target_sr = target_sr
         self.instance_transforms = instance_transforms
 
@@ -79,26 +76,31 @@ class BaseDataset(Dataset):
                 (a single dataset element).
         """
         data_dict = self._index[ind]
-        audio_path = data_dict["path"]
-        audio = self.load_audio(audio_path)
-        text = data_dict["text"]
-        text_encoded = self.text_encoder.encode(text)
 
-        spectrogram = self.get_spectrogram(audio)
+        mix_path = data_dict["mix_path"]
+        mix_audio = self.load_audio(mix_path)
+
+        s1_path = data_dict["s1_path"]
+        s1_audio = self.load_audio(s1_path)
+
+        s2_path = data_dict["s2_path"]
+        s2_audio = self.load_audio(s2_path)
 
         instance_data = {
-            "audio": audio,
-            "spectrogram": spectrogram,
-            "text": text,
-            "text_encoded": text_encoded,
-            "audio_path": audio_path,
+            "mix_audio": mix_audio,
+            "mix_path": mix_path,
+            "mix_len": data_dict["mix_len"],
+        
+            "s1_audio": s1_audio,
+            "s1_path": s1_audio,
+            "s1_len": data_dict["s1_len"],
+
+            "s2_audio": s2_audio,
+            "s2_path": s2_path,
+            "s2_len": data_dict["s2_len"]
         }
 
-        # TODO think of how to apply wave augs before calculating spectrogram
-        # Note: you may want to preserve both audio in time domain and
-        # in time-frequency domain for logging
         instance_data = self.preprocess_data(instance_data)
-
         return instance_data
 
     def __len__(self):

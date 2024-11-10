@@ -14,7 +14,7 @@ class SSDataset(BaseDataset):
             entry = {}
             if path.suffix in [".mp3", ".wav", ".flac", ".m4a"]:
                 entry["mix_path"] = str(path)
-                entry["audio_len"] = self._calc_audio_len(entry["mix_path"])
+                entry["mix_len"] = self._calc_audio_len(entry["mix_path"])
 
                 if s1_audio_dir and Path(s1_audio_dir).exists():
                     s1_path = Path(s1_audio_dir) / (path.stem + path.suffix)
