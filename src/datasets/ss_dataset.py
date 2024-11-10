@@ -10,9 +10,9 @@ class SSAudioOnlyDataset(BaseDataset):
     def __init__(self, *args, **kwargs):
         self._data_dir = ROOT_PATH / "data" / "dataset_ss"
 
-        mix_audio_dir = self._data_dir / "audio" / "mix"
-        s1_audio_dir = self._data_dir / "audio" / "s1"
-        s2_audio_dir = self._data_dir / "audio" / "s2" 
+        mix_audio_dir = self._data_dir / "audio" / "train" / "mix"
+        s1_audio_dir = self._data_dir / "audio" / "train" / "s1"
+        s2_audio_dir = self._data_dir / "audio"/ "train" / "s2" 
         # video_dir = self._data_dir / "video"
         data = []
         for path in Path(mix_audio_dir).iterdir():
