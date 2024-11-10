@@ -77,26 +77,18 @@ class BaseDataset(Dataset):
         """
         data_dict = self._index[ind]
 
-        mix_path = data_dict["mix_path"]
-        mix_audio = self.load_audio(mix_path)
-
-        s1_path = data_dict["s1_path"]
-        s1_audio = self.load_audio(s1_path)
-
-        s2_path = data_dict["s2_path"]
-        s2_audio = self.load_audio(s2_path)
+        mix_audio = self.load_audio(data_dict["mix_path"])
+        s1_audio = self.load_audio(data_dict["s1_path"])
+        s2_audio = self.load_audio(data_dict["s2_path"])
 
         instance_data = {
             "mix_audio": mix_audio,
-            "mix_path": mix_path,
             "mix_len": data_dict["mix_len"],
         
             "s1_audio": s1_audio,
-            "s1_path": s1_audio,
             "s1_len": data_dict["s1_len"],
 
             "s2_audio": s2_audio,
-            "s2_path": s2_path,
             "s2_len": data_dict["s2_len"]
         }
 

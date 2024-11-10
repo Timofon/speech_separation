@@ -22,5 +22,7 @@ def collate_fn(dataset_items: list[dict]):
             torch.tensor([item[key] for item in dataset_items])
         elif 'audio' in key:
             result[key] = pad_sequence([item[key].squeeze() for item in dataset_items], batch_first=True)
+        else:
+            result[key] = [item[key] for item in dataset_items]
     
     return result
