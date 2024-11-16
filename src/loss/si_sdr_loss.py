@@ -4,12 +4,13 @@ from torch import nn
 from src.metrics.utils import calc_si_sdri
 
 class SI_SDRILoss(nn.Module):
-    def forward(self, s1: torch.Tensor, s2: torch.Tensor, 
-                s1_pred: torch.Tensor, s2_pred: torch.Tensor, mix: torch.Tensor, **batch):
-        s1_s1 = calc_si_sdri(s1, s1_pred, mix)
-        s1_s2 = calc_si_sdri(s1, s2_pred, mix)
-        s2_s1 = calc_si_sdri(s2, s1_pred, mix)
-        s2_s2 = calc_si_sdri(s2, s2_pred, mix)
+    def forward(self, s1_audio: torch.Tensor, s2_audio: torch.Tensor, 
+                s1_predicted: torch.Tensor, s2_predicted: torch.Tensor, mix_audio: torch.Tensor, **batch):
+        s1_true = calc_si_sdri(s1_predicted, s1_audio, mix_audio)
+        s2_true = calc_si_sdri(s2_predicted, s2_audio, mix_audio)
 
-        loss = torch.maximum((s1_s1 + s2_s2) / 2, (s1_s2 + s2_s1) / 2)
+        s1_permuted = calc_si_sdri(s1_predicted, s2_audio, mix_audio)
+        s2_permuted = calc_si_sdri(s2_predicted, s1_audio, mix_audio)
+
+        loss = torch.maximum((s1_true + s2_true) / 2, (s1_permuted + s2_permuted) / 2)
         return {"loss": -torch.mean(loss)}

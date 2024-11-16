@@ -5,6 +5,6 @@ train:
   instance_transforms: ${transforms.instance_transforms.train}
 val:
   _target_: src.datasets.ss_dataset.SSAudioOnlyDataset
-  part: val
+  part: train
   limit: 2
   instance_transforms: ${transforms.instance_transforms.inference}

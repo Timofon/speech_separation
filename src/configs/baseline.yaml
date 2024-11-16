@@ -19,7 +19,7 @@ lr_scheduler:
 loss_function:
   _target_: src.loss.SI_SDRILoss
 trainer:
-  log_step: 50
+  log_step: 10
   n_epochs: 50
   epoch_len: 200
   device_tensors: ["s1_audio", "s2_audio", "mix_audio"] # which tensors should be on device (ex. GPU)

@@ -41,8 +41,8 @@ class Trainer(BaseTrainer):
 
         outputs = self.model(**batch)
         outputs = {
-            "s1_predicted": outputs[:, 0, :],
-            "s2_predicted": outputs[:, 1, :],
+            "s1_predicted": outputs['s1_predicted'],
+            "s2_predicted": outputs['s2_predicted'],
         }
         batch.update(outputs)
 
@@ -87,21 +87,21 @@ class Trainer(BaseTrainer):
             self.log_audio(**batch)
             self.log_predictions(**batch)
     
-    def log_audio(self, s1, s2, mix, **batch):
-        self.writer.add_audio("first_audio", s1[0], 16000)
-        self.writer.add_audio("second_audio", s2[0], 16000)
+    def log_audio(self, s1_audio, s2_audio, mix_audio, **batch):
+        self.writer.add_audio("first_audio", s1_audio[0], 16000)
+        self.writer.add_audio("second_audio", s2_audio[0], 16000)
 
-        self.writer.add_audio("mix_audio", mix[0], 16000)
+        self.writer.add_audio("mix_audio", mix_audio[0], 16000)
 
     def log_predictions(
-        self, s1, s2, s1_predicted, s2_predicted, mix, **batch
+        self, s1_audio, s2_audio, s1_predicted, s2_predicted, mix_audio, **batch
     ):
-        self.writer.add_audio("first_audio", s1[0], 16000)
+        self.writer.add_audio("first_audio", s1_audio[0], 16000)
         self.writer.add_audio("first_predicted", s1_predicted[0], 16000)
         
-        self.writer.add_audio("second_audio", s2[0], 16000)
+        self.writer.add_audio("second_audio", s2_audio[0], 16000)
         self.writer.add_audio("second_predicted", s2_predicted[0], 16000)
         
-        self.writer.add_audio("mix_audio", mix[0], 16000)
+        self.writer.add_audio("mix_audio", mix_audio[0], 16000)
 
-        self.writer.add_scalar("SI-SDRi", SISDRiMetric(s1, s2, s1_predicted, s2_predicted, mix))
+        self.writer.add_scalar("SI-SDRi", SISDRiMetric(s1_audio, s2_audio, s1_predicted, s2_predicted, mix_audio))

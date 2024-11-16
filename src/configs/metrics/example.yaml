@@ -1,4 +1,4 @@
 train: [] # metrics that are calculated during training
 inference: # metrics that are calculated during inference (eval)
-  - _target_: src.metrics.SISDRiMetrics
+  - _target_: src.metrics.SISDRiMetric
     name: "SI_SDRI" # it is better to avoid spaces in names

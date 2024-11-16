@@ -1,54 +1,64 @@
-from torch import nn
-from torch.nn import Sequential
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
-class SourceSeparator(nn.Module):
-    def __init__(self, input_channels=2, hidden_channels=64, num_layers=3):
-        super(SourceSeparator, self).__init__()
 
-        self.input_channels = input_channels
-        self.hidden_channels = hidden_channels
-        self.num_layers = num_layers
+class Encoder(nn.Module):
+    def __init__(self, input_size, hidden_size, kernel_size, stride):
+        super(Encoder, self).__init__()
+        self.conv = nn.Conv1d(in_channels=input_size,
+                              out_channels=hidden_size,
+                              kernel_size=kernel_size,
+                              stride=stride)
 
-        self.encoder = nn.LSTM(
-        input_size=input_channels, 
-        hidden_size=hidden_channels, 
-        num_layers=num_layers, 
-        batch_first=True,
-        bidirectional=True
-        )
+    def forward(self, x):
+        x = self.conv(x)
+        return F.relu(x)
 
-        self.decoder = nn.LSTM(
-        input_size=hidden_channels * 2,
-        hidden_size=hidden_channels,
-        num_layers=num_layers,
-        batch_first=True,
-        bidirectional=True
-        )
 
-        self.output_layer = nn.Linear(hidden_channels * 2, input_channels) 
+class Masking(nn.Module):
+    def __init__(self, hidden_size):
+        super(Masking, self).__init__()
 
-    def forward(self, mix_audio):
-        _, (hidden_state, _) = self.encoder(mix_audio)
-        hidden_state = hidden_state.view(self.num_layers, 2, self.hidden_channels)
-        hidden_state = hidden_state[-1, :, :]
-        
-        decoded, _ = self.decoder(hidden_state.unsqueeze(0).repeat(mix_audio.shape[0], 1, 1)) 
+        self.mask_spk1 = nn.Conv1d(hidden_size, hidden_size, kernel_size=1)
+        self.mask_spk2 = nn.Conv1d(hidden_size, hidden_size, kernel_size=1)
 
-        separated_sources = self.output_layer(decoded)
-        
-        return separated_sources
-   
-    def __str__(self):
-        """
-        Model prints with the number of parameters.
-        """
-        all_parameters = sum([p.numel() for p in self.parameters()])
-        trainable_parameters = sum(
-            [p.numel() for p in self.parameters() if p.requires_grad]
-        )
+    def forward(self, x):
+        mask1 = torch.sigmoid(self.mask_spk1(x))
+        mask2 = torch.sigmoid(self.mask_spk2(x))
+        return x * mask1, x * mask2
 
-        result_info = super().__str__()
-        result_info = result_info + f"\nAll parameters: {all_parameters}"
-        result_info = result_info + f"\nTrainable parameters: {trainable_parameters}"
 
-        return result_info
+class Decoder(nn.Module):
+    def __init__(self, hidden_size, kernel_size, stride):
+        super(Decoder, self).__init__()
+        self.deconv = nn.ConvTranspose1d(in_channels=hidden_size,
+                                         out_channels=1,
+                                         kernel_size=kernel_size,
+                                         stride=stride)
+
+    def forward(self, x):
+        return self.deconv(x)
+
+
+class BaselineModel(nn.Module):
+    def __init__(self, input_size=1, hidden_size=128, kernel_size=16, stride=8):
+        super(BaselineModel, self).__init__()
+        self.encoder = Encoder(input_size, hidden_size, kernel_size, stride)
+        self.masking = Masking(hidden_size)
+        self.decoder_spk1 = Decoder(hidden_size, kernel_size, stride)
+        self.decoder_spk2 = Decoder(hidden_size, kernel_size, stride)
+
+    def forward(self, mix_audio: torch.Tensor, **batch):
+        mix_audio = mix_audio.unsqueeze(1)
+        encoded_audio = self.encoder(mix_audio)
+
+        masked_spk1, masked_spk2 = self.masking(encoded_audio)
+
+        output_spk1 = self.decoder_spk1(masked_spk1).squeeze(1)
+        output_spk2 = self.decoder_spk2(masked_spk2).squeeze(1)
+
+        return {
+            's1_predicted': output_spk1,
+            's2_predicted': output_spk2
+        }
