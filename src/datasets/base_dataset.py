@@ -6,8 +6,6 @@ import torch
 import torchaudio
 from torch.utils.data import Dataset
 
-from src.text_encoder import CTCTextEncoder
-
 logger = logging.getLogger(__name__)
 
 
@@ -78,19 +76,26 @@ class BaseDataset(Dataset):
         data_dict = self._index[ind]
 
         mix_audio = self.load_audio(data_dict["mix_path"])
-        s1_audio = self.load_audio(data_dict["s1_path"])
-        s2_audio = self.load_audio(data_dict["s2_path"])
+        s1_audio = None
+        s2_audio = None
+        if "s1_path" in data_dict.keys() and "s2_path" in data_dict.keys():
+            s1_audio = self.load_audio(data_dict["s1_path"])
+            s2_audio = self.load_audio(data_dict["s2_path"])
+            instance_data = {
+                "mix_audio": mix_audio,
+                "mix_path": data_dict["mix_path"],
+            
+                "s1_audio": s1_audio,
+                "s1_path": data_dict["s1_path"],
 
-        instance_data = {
-            "mix_audio": mix_audio,
-            "mix_len": data_dict["mix_len"],
-        
-            "s1_audio": s1_audio,
-            "s1_len": data_dict["s1_len"],
-
-            "s2_audio": s2_audio,
-            "s2_len": data_dict["s2_len"]
-        }
+                "s2_audio": s2_audio,
+                "s2_path": data_dict["s2_path"]
+            }
+        else:
+            instance_data = {
+                "mix_audio": mix_audio,
+                "mix_path": data_dict["mix_path"],
+            }
 
         instance_data = self.preprocess_data(instance_data)
         return instance_data
