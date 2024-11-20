@@ -1,0 +1,12 @@
+train:
+  _target_: src.datasets.ss_dataset.SSAudioOnlyDataset
+  mix_dir: "/home/aamatosyan/DLA/speech_separation/data/dla_dataset/audio/train/mix"
+  s1_dir: "/home/aamatosyan/DLA/speech_separation/data/dla_dataset/audio/train/s1"
+  s2_dir: "/home/aamatosyan/DLA/speech_separation/data/dla_dataset/audio/train/s2"
+  instance_transforms: ${transforms.instance_transforms.train}
+val:
+  _target_: src.datasets.ss_dataset.SSAudioOnlyDataset
+  mix_dir: "/home/aamatosyan/DLA/speech_separation/data/dla_dataset/audio/val/mix"
+  s1_dir: "/home/aamatosyan/DLA/speech_separation/data/dla_dataset/audio/val/s1"
+  s2_dir: "/home/aamatosyan/DLA/speech_separation/data/dla_dataset/audio/val/s2"
+  instance_transforms: ${transforms.instance_transforms.inference}

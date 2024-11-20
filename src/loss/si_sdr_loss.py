@@ -13,4 +13,5 @@ class SI_SDRILoss(nn.Module):
         s2_permuted = calc_si_sdri(s2_predicted, s1_audio, mix_audio)
 
         loss = torch.maximum((s1_true + s2_true) / 2, (s1_permuted + s2_permuted) / 2)
-        return {"loss": -torch.mean(loss)}
+        return {"loss": -torch.mean(loss)}    
+    
