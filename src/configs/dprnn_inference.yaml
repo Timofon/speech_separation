@@ -1,0 +1,13 @@
+defaults:
+  - model: dprnn
+  - metrics: example
+  - datasets: inference # we do not want to run inference on training data
+  - dataloader: dprnn_loader
+  - transforms: example_only_instance
+  - _self_
+inferencer:
+  device_tensors: ["s1_audio", "s2_audio", "mix_audio"] # which tensors should be on device (ex. GPU)
+  device: auto # device name or "auto"
+  save_path: "" # any name here, can be a dataset name
+  seed: 1
+  from_pretrained: "/home/aamatosyan/DLA/speech_separation/saved/dprnn_prelu_lstm_mix(gain)_augsfinetune_restart_lr/model_best.pth" # path to the pretrained model

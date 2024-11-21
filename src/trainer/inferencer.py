@@ -3,7 +3,8 @@ from tqdm.auto import tqdm
 
 from src.metrics.tracker import MetricTracker
 from src.trainer.base_trainer import BaseTrainer
-
+from scipy.io import wavfile
+import numpy as np
 
 class Inferencer(BaseTrainer):
     """
@@ -20,7 +21,6 @@ class Inferencer(BaseTrainer):
         config,
         device,
         dataloaders,
-        text_encoder,
         save_path,
         metrics=None,
         batch_transforms=None,
@@ -60,8 +60,6 @@ class Inferencer(BaseTrainer):
 
         self.model = model
         self.batch_transforms = batch_transforms
-
-        self.text_encoder = text_encoder
 
         # define dataloaders
         self.evaluation_dataloaders = {k: v for k, v in dataloaders.items()}
@@ -120,43 +118,36 @@ class Inferencer(BaseTrainer):
                 the dataloader (possibly transformed via batch transform)
                 and model outputs.
         """
-        # TODO change inference logic so it suits ASR assignment
-        # and task pipeline
-
         batch = self.move_batch_to_device(batch)
         batch = self.transform_batch(batch)  # transform batch on device -- faster
 
         outputs = self.model(**batch)
         batch.update(outputs)
 
-        if metrics is not None:
+        if metrics is not None and 's1_audio' in batch.keys() and 's2_audio' in batch.keys():
             for met in self.metrics["inference"]:
                 metrics.update(met.name, met(**batch))
 
         # Some saving logic. This is an example
         # Use if you need to save predictions on disk
 
-        batch_size = batch["logits"].shape[0]
-        current_id = batch_idx * batch_size
+        batch_size = batch["s1_predicted"].shape[0]
 
         for i in range(batch_size):
             # clone because of
             # https://github.com/pytorch/pytorch/issues/1995
-            logits = batch["logits"][i].clone()
-            label = batch["labels"][i].clone()
-            pred_label = logits.argmax(dim=-1)
+            s1_pred = batch["s1_predicted"][i].clone().cpu().numpy()
+            s2_pred = batch["s2_predicted"][i].clone().cpu().numpy()
 
-            output_id = current_id + i
+            s1_pred = s1_pred / np.max(np.abs(s1_pred))
+            s2_pred = s2_pred / np.max(np.abs(s2_pred))
 
-            output = {
-                "pred_label": pred_label,
-                "label": label,
-            }
-
+            wav_filename = batch["mix_path"][i].split('/')[-1]
             if self.save_path is not None:
                 # you can use safetensors or other lib here
-                torch.save(output, self.save_path / part / f"output_{output_id}.pth")
-
+                wavfile.write(self.save_path / "s1_prediction" / f"{wav_filename}", rate=16000, data=s1_pred)
+                wavfile.write(self.save_path / "s2_prediction" / f"{wav_filename}", rate=16000, data=s2_pred)
+                
         return batch
 
     def _inference_part(self, part, dataloader):
@@ -177,7 +168,8 @@ class Inferencer(BaseTrainer):
 
         # create Save dir
         if self.save_path is not None:
-            (self.save_path / part).mkdir(exist_ok=True, parents=True)
+            (self.save_path / "s1_prediction").mkdir(exist_ok=True, parents=True)
+            (self.save_path / "s2_prediction").mkdir(exist_ok=True, parents=True)
 
         with torch.no_grad():
             for batch_idx, batch in tqdm(
