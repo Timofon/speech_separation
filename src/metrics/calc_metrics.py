@@ -4,7 +4,6 @@ from pathlib import Path
 from tqdm import tqdm
 import os
 import torchaudio
-import torch
 
 from src.metrics.utils import calc_si_sdr, calc_si_sdri, calc_si_snri
 
@@ -34,7 +33,6 @@ def calc_metrics(mix_dir, s1_pred_dir, s2_pred_dir, s1_gt_dir=None, s2_gt_dir=No
             s2_pred_audio = load_audio(s2_pred_path)
             s1_gt_audio = load_audio(s1_gt_path)
             s2_gt_audio = load_audio(s2_gt_path)
-
 
             # SI-SDRI
             s1_true = calc_si_sdri(s1_pred_audio, s1_gt_audio, mix_audio)

@@ -1,0 +1,13 @@
+defaults:
+  - model: convtasnet
+  - metrics: example
+  - datasets: inference # we do not want to run inference on training data
+  - dataloader: example
+  - transforms: example_only_instance
+  - _self_
+inferencer:
+  device_tensors: ["s1_audio", "s2_audio", "mix_audio"] # which tensors should be on device (ex. GPU)
+  device: auto # device name or "auto"
+  save_path: "" # any name here, can be a dataset name
+  seed: 1
+  from_pretrained: "src/best_model_weights/model_best.pth" # path to the pretrained model

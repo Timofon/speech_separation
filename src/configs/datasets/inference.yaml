@@ -1,0 +1,7 @@
+test:
+  _target_: src.datasets.ss_dataset.SSAudioOnlyDataset
+  mix_dir: "/home/timsenin/pytorch_project_template/data/dla_dataset/audio/val/mix"
+  s1_dir: "/home/timsenin/pytorch_project_template/data/dla_dataset/audio/val/s1"
+  s2_dir: "/home/timsenin/pytorch_project_template/data/dla_dataset/audio/val/s2"
+  with_gt: False
+  instance_transforms: ${transforms.instance_transforms.inference}
