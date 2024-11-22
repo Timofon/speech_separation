@@ -15,8 +15,7 @@ editdistance
 wget
 gdown
 pathlib
-kenlm
-pyctcdecode
+scipy
 
 black
 isort

@@ -74,6 +74,12 @@ python inference.py inferencer.save_path='<enter your path>'
 
 You need to specify `save_path` according to your file system. Also you need to specify paths to your dataset in inference dataset config.
 
+To download checkpoint run
+
+```bash
+python download_checkpoint.py
+```
+
 ## How To Measure Metrics
 
 To measure metrics, run the following command based on your directories:
