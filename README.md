@@ -78,6 +78,8 @@ To run inference (save predictions):
 python inference.py inferencer.save_path='<enter your path>' datasets.test.mix_dir='<enter path to dir with mix audio>' datasets.test.s1_dir='<enter path to dir with s1 audio>' datasets.test.s2_dir='<enter path to dir with s2 audio>'
 ```
 
+If you want to evaluate the model without having ground truth audios, you can just set `datasets.test.s1_dir` and `datasets.test.s2_dir` to `null`.
+
 ## How To Measure Metrics
 
 To measure metrics, run the following command based on your directories:
