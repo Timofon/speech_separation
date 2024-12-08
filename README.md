@@ -10,7 +10,7 @@
 
 ## About
 
-This repository contains implementation of models described in research paper.
+This repository contains implementation of models described in research paper. As a result of the experiments conducted, ConvTasNet turned out to be the best model.
 
 See the task assignment [here](https://github.com/markovka17/dla/tree/2024/project_avss).
 
