@@ -66,18 +66,16 @@ Where `CONFIG_NAME` is a config from `src/configs` and `HYDRA_CONFIG_ARGUMENTS` 
 
 If you want to fine-tune model with augmentations (like our best model), then you need to add `from_pretrained` parameter to trainer section in train config and specify in it the path to your checkpoint. Also you need to change config in `transforms` section to `example_only_instance_augs`.
 
-To run inference (save predictions):
-
-```bash
-python inference.py inferencer.save_path='<enter your path>'
-```
-
-You need to specify `save_path` according to your file system. Also you need to specify paths to your dataset in inference dataset config.
-
 To download checkpoint run
 
 ```bash
 python download_checkpoint.py
+```
+
+To run inference (save predictions):
+
+```bash
+python inference.py inferencer.save_path='<enter your path>' datasets.test.mix_dir='<enter path to dir with mix audio>' datasets.test.s1_dir='<enter path to dir with s1 audio>' datasets.test.s2_dir='<enter path to dir with s2 audio>'
 ```
 
 ## How To Measure Metrics
